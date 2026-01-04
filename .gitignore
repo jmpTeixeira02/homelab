@@ -1,0 +1,9 @@
+.terraform/
+.terraform.lock.hcl
+
+# Secrets
+*.tfvars
+
+# State Files
+*.tfstate
+*.tfstate.*
