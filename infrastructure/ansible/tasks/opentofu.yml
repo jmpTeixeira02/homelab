@@ -1,0 +1,31 @@
+---
+- name: Create TerraformProv Role
+  ansible.builtin.command:
+    cmd: >
+      pveum role add TerraformProv -privs
+      "Datastore.AllocateSpace Datastore.AllocateTemplate Datastore.Audit
+      Pool.Allocate Pool.Audit Sys.Audit Sys.Console Sys.Modify
+      VM.Allocate VM.Audit VM.Clone VM.Config.CDROM VM.Config.Cloudinit
+      VM.Config.CPU VM.Config.Disk VM.Config.HWType VM.Config.Memory
+      VM.Config.Network VM.Config.Options VM.Migrate VM.PowerMgmt SDN.Use"
+  register: role_result
+  failed_when: "role_result.rc != 0 and 'already exists' not in role_result.stderr"
+  changed_when: "role_result.rc == 0"
+
+- name: Create Terraform User
+  ansible.builtin.command:
+    cmd: "pveum user add terraform-prov@pve --password {{ pm_password }}"
+  register: user_result
+  failed_when: "user_result.rc != 0 and 'already exists' not in user_result.stderr"
+  changed_when: "user_result.rc == 0"
+
+- name: Apply ACL to User
+  ansible.builtin.command:
+    cmd: "pveum aclmod / -user terraform-prov@pve -role TerraformProv"
+  changed_when: true
+
+- name: Generate OpenTofu secrets
+  ansible.builtin.template:
+    src: templates/tofu.tfvars.j2
+    dest: "../tofu/terraform.tfvars"
+  delegate_to: localhost

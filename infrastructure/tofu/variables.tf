@@ -1,6 +1,6 @@
 variable "pm_api_url" {
   type        = string
-  description = "The Proxmox API URL (e.g., https://192.168.1.10:8006/api2/json)"
+  description = "The Proxmox API URL (e.g., https://192.168.1.1:8006/api2/json)"
 }
 
 variable "pm_user" {
