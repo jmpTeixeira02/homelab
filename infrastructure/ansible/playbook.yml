@@ -4,7 +4,6 @@
   vars_files:
     - vars.yml
   vars:
-    talos_image_url: "https://factory.talos.dev/image/ce4c980550dd2ab1b17bbf2b08801c7eb59418eafe8f279833297925d67c7515/v1.12.1/nocloud-amd64.iso"
     pve_repository_line: "deb http://download.proxmox.com/debian/pve bookworm pve-no-subscription"
     pve_remove_subscription_nag: true
     pve_reboot_on_kernel_update: true
@@ -15,12 +14,3 @@
     pve_mediated_devices_enabled: false
   roles:
     - role: lae.proxmox
-
-  tasks:
-    - name: Setup OpenTofu and create secrets
-      ansible.builtin.import_tasks: tasks/opentofu.yml
-    - name: Download Talos ISO to Proxmox storage
-      ansible.builtin.get_url:
-        url: "{{ talos_image_url }}"
-        dest: "/var/lib/vz/template/iso/talos-nocloud.iso"
-        mode: "0644"
