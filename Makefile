@@ -20,4 +20,4 @@ add-node:
 
 playbook: 
 	ansible-galaxy install lae.proxmox
-	ansible-playbook -i $(ANSIBLE_DIR)/inventory.ini $(ANSIBLE_DIR)/playbook.yml \
+	ansible-playbook -i $(ANSIBLE_DIR)/inventory.ini $(ANSIBLE_DIR)/proxmox.yml \
