@@ -1,0 +1,4 @@
+_secrets: "{{ lookup('community.sops.sops', playbook_dir + '../../../secrets.json') | from_json }}"
+ansible_user: "{{ _secrets['clusters_access'][cluster]['node_user'] }}"
+ansible_password: "{{ _secrets['clusters_access'][cluster]['node_password'] }}"
+ansible_become_password: "{{ _secrets['clusters_access'][cluster]['node_password'] }}"

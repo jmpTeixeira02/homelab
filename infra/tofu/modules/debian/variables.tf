@@ -3,12 +3,23 @@ variable "clusters" {
   type = map(object({
     gateway         = string
     subnet_mask     = optional(string, "24")
-    datacenter = string # Proxmox Datacenter
-    user        = object({
-      username = string
-      password = optional(string)
-      keys     = optional(list(string), [])
-    })
+    datacenter = string
+  }))
+}
+
+variable "clusters_access" {
+  sensitive = true
+  description = "Cluster access configuration"
+  type = map(object({
+    ip = string
+    proxmox_user = string
+    proxmox_password = string
+    proxmox_endpoint = string
+    proxmox_insecure = optional(bool, false)
+
+    node_user = string
+    node_password = optional(string)
+    node_keys     = optional(list(string), [])
   }))
 }
 

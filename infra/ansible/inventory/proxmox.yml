@@ -1,0 +1,8 @@
+all:
+  children:
+    proxmox_nodes:
+      vars:
+        ansible_user: root
+      hosts:
+        pve-core:
+          ansible_host: 192.168.1.88

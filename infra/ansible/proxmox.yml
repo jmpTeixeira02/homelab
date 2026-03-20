@@ -1,16 +1,18 @@
 - name: Setup Proxmox
   hosts: proxmox_nodes
   gather_facts: true
-  vars_files:
-    - vars.yml
   vars:
     pve_repository_line: "deb http://download.proxmox.com/debian/pve bookworm pve-no-subscription"
     pve_remove_subscription_nag: true
     pve_reboot_on_kernel_update: true
     pve_pcie_passthrough_enabled: true
 
-    # For Intel i7 4th Gen
     pve_iommu_passthrough_mode: true
-    pve_mediated_devices_enabled: false
+    pve_mediated_devices_enabled: true
+  tasks:
+    - name: Load encrypted secrets
+      community.sops.load_vars:
+        file: secrets.yaml
+      no_log: true
   roles:
     - role: lae.proxmox

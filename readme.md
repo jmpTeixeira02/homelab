@@ -22,7 +22,7 @@ It has affinity with services that are RAM heavy
 This is a processing node which contains a better iGPU and faster CPU
 It has affinity with services that have HW Acceleration
 - i5-8700T
-- 16GB RAM DDR3
+- 16GB RAM DDR4
 - 256GB Management M.2 SSD
 - OS: Proxmox
     - Jellyfin
@@ -34,3 +34,13 @@ It has affinity with services that have HW Acceleration
 - Ansible for Proxmox Initial Setup
 - OpenTofu to create VMs and LXCs in Proxmox
 - Ansible for service deployment
+
+# Setup 
+This repo contains a vault using [SOPS](https://github.com/getsops/sops) and [Age](https://github.com/FiloSottile/age)
+- To use ensure the private key is stored in `$XDG_CONFIG_HOME/sops/age/keys.txt`
+- To edit the secrets use `sops edit <file>`
+
+
+# TODO 
+- Ansible Scripts install docker and compose on Debian
+- Add services

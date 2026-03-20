@@ -11,5 +11,5 @@ resource "proxmox_virtual_environment_download_file" "this" {
   datastore_id            = "local"
   node_name = each.key
   url                     = "https://cloud.debian.org/images/cloud/trixie/latest/debian-13-genericcloud-amd64.qcow2"
-  file_name    = "debian-13-nocloud-amd64.img"
+  file_name    = "debian-13-genericcloud-amd64.img"
 }

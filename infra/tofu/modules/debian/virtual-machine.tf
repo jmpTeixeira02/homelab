@@ -2,6 +2,7 @@ locals {
   nodes = {
     for k, n in var.nodes : k => merge(n, {
       cluster = var.clusters[n.cluster]
+      cluster_access = var.clusters_access[n.cluster]
     })
   }
 }
@@ -21,6 +22,12 @@ resource "proxmox_virtual_environment_vm" "this" {
     dedicated = each.value.ram
   }
 
+  network_device {
+    bridge = "vmbr0"
+    model  = "virtio"
+  }
+
+
   disk {
     datastore_id = each.value.datastore_id
     file_id      = proxmox_virtual_environment_download_file.this[each.value.cluster.datacenter].id
@@ -31,9 +38,9 @@ resource "proxmox_virtual_environment_vm" "this" {
   initialization {
     datastore_id = each.value.datastore_id
     user_account {
-      username = each.value.cluster.user.username
-      password = each.value.cluster.user.password
-      keys     = each.value.cluster.user.keys
+      username = each.value.cluster_access.node_user
+      password = each.value.cluster_access.node_password
+      keys     = each.value.cluster_access.node_keys
     }
     ip_config {
       ipv4 {
