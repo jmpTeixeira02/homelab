@@ -1,0 +1,20 @@
+---
+- name: Deploy Services
+  hosts: debian
+  become: true
+  vars:
+    services_dir: "{{ playbook_dir }}/../../../../services"
+    remote_services_dir: ~/services
+  tasks:
+    - name: Copy services
+      copy:
+        src: "{{ services_dir }}"
+        dest: "{{ remote_services_dir }}"
+        mode: "0644"
+
+    - name: Deploy all services
+      community.docker.docker_compose_v2:
+        project_src: "{{ remote_services_dir }}/services"
+        project_name: homelab
+        state: present
+        remove_orphans: true

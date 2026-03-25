@@ -26,4 +26,4 @@ init-proxmox:
 	cd $(ANSIBLE_DIR) && ansible-playbook playbooks/proxmox.yml
 
 init-debian:
-	cd $(ANSIBLE_DIR) && ansible-playbook playbooks/debian/docker.yml
+	cd $(ANSIBLE_DIR) && ansible-playbook playbooks/debian/debian.yml
