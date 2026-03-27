@@ -3,8 +3,10 @@
   hosts: debian
   become: true
   vars:
+    secrets_dir: "{{ playbook_dir }}/../../../../secrets"
     services_dir: "{{ playbook_dir }}/../../../../services"
-    remote_services_dir: ~/services
+    remote_services_dir: .
+    domain: "{{ lookup('community.sops.sops', secrets_dir + '/services/shared.sops')  }}"
   tasks:
     - name: Copy services
       copy:
@@ -12,9 +14,25 @@
         dest: "{{ remote_services_dir }}"
         mode: "0644"
 
+    - name: Decrypt and copy service shared env file
+      copy:
+        content: "{{ lookup('community.sops.sops', secrets_dir + '/services/shared.sops') }}"
+        dest: "{{ remote_services_dir }}/services/shared.env"
+        mode: "0600"
+
+    - name: Decrypt and copy service env files
+      copy:
+        content: "{{ lookup('community.sops.sops', secrets_dir + '/services/' + item + '.sops') }}"
+        dest: "{{ remote_services_dir }}/services/{{ item }}/.env"
+        mode: "0600"
+      loop:
+        - network
+
     - name: Deploy all services
       community.docker.docker_compose_v2:
         project_src: "{{ remote_services_dir }}/services"
         project_name: homelab
         state: present
         remove_orphans: true
+        env_files:
+          - ./shared.env
