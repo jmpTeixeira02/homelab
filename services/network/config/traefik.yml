@@ -21,13 +21,19 @@ providers:
     endpoint: "unix://var/run/docker.sock"
     exposedByDefault: false
 certificatesResolvers:
-  duckdns:
+  desec:
     acme:
       email: joaompt2002@hotmail.com
-      storage: /var/traefik/certs/duckdns-acme.json
-      caServer: "https://acme-v02.api.letsencrypt.org/directory"
+      storage: /var/traefik/certs/desec.json
+      caServer: https://acme-v02.api.letsencrypt.org/directory
       dnsChallenge:
-        provider: duckdns
+        provider: desec
         resolvers:
-          - "1.1.1.1:53"
-          - "8.8.8.8:53"
+          - "ns1.desec.io:53"
+          - "ns2.desec.org:53"
+          - "8.8.8.8:53" # Google
+          - "8.8.4.4:53" # Google
+          - "1.1.1.1:53" # Cloudflare
+          - "1.0.0.1:53" # Cloudflare
+        delayBeforeCheck: 30s
+        disablePropagationCheck: true

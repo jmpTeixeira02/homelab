@@ -1,11 +1,26 @@
 name: homelab
 services:
-  duckdns:
-    image: lscr.io/linuxserver/duckdns:latest
-    container_name: duckdns
+  ddns-updater:
+    image: qmcgaw/ddns-updater:v2.8
+    container_name: ddns-updater
     environment:
-      - SUBDOMAINS=${DUCKDNS_SUBDOMAINS}
-      - TOKEN=${DUCKDNS_TOKEN}
+      CONFIG: |
+        {
+          "settings": [
+            {
+              "provider": "desec",
+              "domain": "${DOMAIN}",
+              "token": "${DESEC_TOKEN}",
+              "ip_version": "ipv4"
+            }
+          ]
+        }
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.ddns-updater.tls=true
+      - traefik.http.routers.ddns-updater.entryPoints=websecure
+      - traefik.http.routers.ddns-updater.rule=Host(`ddns-updater.${DOMAIN}`)
+      - traefik.http.routers.ddns-updater.tls.certresolver=desec
     networks:
       - proxy
     restart: unless-stopped
@@ -21,16 +36,16 @@ services:
       - ./config/traefik.yml:/etc/traefik/traefik.yml:ro
       - ./data/certs/:/var/traefik/certs/:rw
     environment:
-      - DUCKDNS_TOKEN=${DUCKDNS_TOKEN}
+      - DESEC_TOKEN=${DESEC_TOKEN}
     networks:
       - proxy
     labels:
       - traefik.enable=true
       - traefik.http.routers.traefik.tls=true
-      - traefik.http.routers.traefik.tls.certresolver=duckdns
       - traefik.http.routers.traefik.entryPoints=websecure
       - traefik.http.routers.traefik.rule=Host(`traefik.${DOMAIN}`)
       - traefik.http.routers.traefik.service=api@internal
+      - traefik.http.routers.traefik.tls.certresolver=desec
     restart: unless-stopped
 networks:
   proxy:
