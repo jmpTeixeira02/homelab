@@ -12,7 +12,7 @@ It has affinity with services that are RAM heavy
 - OS: Proxmox
     - OpenMediaVault VM
     - Services VM - Debian Bookworm
-        - Network Infra (NetBird, Traefik, Pi-Hole)
+        - Network Infra (NetBird, Traefik, Adguard, Authelia, DDNS-Updater)
         - ArrStack (Sonarr, Radarr, Prowlarr, qBitTorrent, Bazarr)
         - Immich Server
         - Monitoring Stack
@@ -42,5 +42,6 @@ This repo contains a vault using [SOPS](https://github.com/getsops/sops) and [Ag
 
 
 # TODO 
-- Ansible Scripts install docker and compose on Debian
-- Add services
+- Enable DNS over TLS Encryption on Adguard
+- Add Authelia
+- Add Missing Services

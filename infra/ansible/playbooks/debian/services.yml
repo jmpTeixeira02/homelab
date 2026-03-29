@@ -28,6 +28,33 @@
       loop:
         - network
 
+    - name: Create systemd-resolved config directory
+      file:
+        path: /etc/systemd/resolved.conf.d
+        state: directory
+        mode: "0755"
+
+    - name: Disable DNSStubListener
+      copy:
+        dest: /etc/systemd/resolved.conf.d/adguardhome.conf
+        content: |
+          [Resolve]
+          DNS=127.0.0.1
+          DNSStubListener=no
+        mode: "0644"
+
+    - name: Activate symlinked resolv.conf
+      file:
+        src: /run/systemd/resolve/resolv.conf
+        dest: /etc/resolv.conf
+        state: link
+        force: true
+
+    - name: Restart systemd-resolved
+      systemd:
+        name: systemd-resolved
+        state: restarted
+
     - name: Deploy all services
       community.docker.docker_compose_v2:
         project_src: "{{ remote_services_dir }}/services"

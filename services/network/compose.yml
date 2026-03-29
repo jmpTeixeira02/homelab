@@ -1,5 +1,30 @@
 name: homelab
 services:
+  adguard:
+    image: adguard/adguardhome
+    container_name: adguard
+    ports:
+      - "3000:3000/tcp"
+      - "53:53/tcp"
+      - "53:53/udp"
+      - "853:853/tcp"
+      - "5443:5443/tcp"
+      - "5443:5443/udp"
+    networks:
+      - proxy
+    restart: unless-stopped
+    volumes:
+      - ./data/adguard:/opt/adguardhome/work
+      - ./config/adguard:/opt/adguardhome/conf
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.adguard.tls=true
+      - traefik.http.routers.adguard.entryPoints=websecure
+      - traefik.http.routers.adguard.rule=Host(`adguard.${DOMAIN}`)
+      - traefik.http.routers.adguard.tls.certresolver=desec
+      - traefik.http.routers.adguard.tls.domains[0].main=${DOMAIN}
+      - traefik.http.routers.adguard.tls.domains[0].sans=*.${DOMAIN}
+      - traefik.http.services.adguard.loadbalancer.server.port=80
   ddns-updater:
     image: qmcgaw/ddns-updater:v2.8
     container_name: ddns-updater
@@ -21,6 +46,8 @@ services:
       - traefik.http.routers.ddns-updater.entryPoints=websecure
       - traefik.http.routers.ddns-updater.rule=Host(`ddns-updater.${DOMAIN}`)
       - traefik.http.routers.ddns-updater.tls.certresolver=desec
+      - traefik.http.routers.ddns-updater.tls.domains[0].main=${DOMAIN}
+      - traefik.http.routers.ddns-updater.tls.domains[0].sans=*.${DOMAIN}
     networks:
       - proxy
     restart: unless-stopped
@@ -28,7 +55,6 @@ services:
     image: traefik:v3.6
     container_name: traefik
     ports:
-      - "80:80"
       - "443:443"
       - "8080:8080"
     volumes:
@@ -41,11 +67,13 @@ services:
       - proxy
     labels:
       - traefik.enable=true
-      - traefik.http.routers.traefik.tls=true
       - traefik.http.routers.traefik.entryPoints=websecure
       - traefik.http.routers.traefik.rule=Host(`traefik.${DOMAIN}`)
       - traefik.http.routers.traefik.service=api@internal
+      - traefik.http.routers.traefik.tls=true
       - traefik.http.routers.traefik.tls.certresolver=desec
+      - traefik.http.routers.traefik.tls.domains[0].main=${DOMAIN}
+      - traefik.http.routers.traefik.tls.domains[0].sans=*.${DOMAIN}
     restart: unless-stopped
 networks:
   proxy:

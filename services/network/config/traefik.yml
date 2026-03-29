@@ -25,9 +25,10 @@ certificatesResolvers:
     acme:
       email: joaompt2002@hotmail.com
       storage: /var/traefik/certs/desec.json
-      caServer: https://acme-v02.api.letsencrypt.org/directory
       dnsChallenge:
         provider: desec
+        disablePropagationCheck: true
+        delayBeforeCheck: 60
         resolvers:
           - "ns1.desec.io:53"
           - "ns2.desec.org:53"
@@ -35,5 +36,3 @@ certificatesResolvers:
           - "8.8.4.4:53" # Google
           - "1.1.1.1:53" # Cloudflare
           - "1.0.0.1:53" # Cloudflare
-        delayBeforeCheck: 30s
-        disablePropagationCheck: true
