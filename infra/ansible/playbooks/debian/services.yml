@@ -5,8 +5,12 @@
   vars:
     secrets_dir: "{{ playbook_dir }}/../../../../secrets"
     services_dir: "{{ playbook_dir }}/../../../../services"
+
     remote_services_dir: .
-    domain: "{{ lookup('community.sops.sops', secrets_dir + '/services/shared.sops')  }}"
+
+    shared_env_content: "{{ lookup('community.sops.sops', secrets_dir + '/services/shared.sops') }}"
+    domain: "{{ shared_env_content | regex_search('DOMAIN=(.*)', '\\1') | first }}"
+    email: "{{ shared_env_content | regex_search('EMAIL=(.*)', '\\1') | first }}"
   tasks:
     - name: Copy services
       copy:
@@ -28,32 +32,51 @@
       loop:
         - network
 
-    - name: Create systemd-resolved config directory
-      file:
-        path: /etc/systemd/resolved.conf.d
-        state: directory
-        mode: "0755"
+    - name: Find config templates locally
+      delegate_to: localhost
+      become: false
+      find:
+        paths: "{{ services_dir }}"
+        patterns: "*.yml.j2"
+        recurse: yes
+      register: local_templates
 
-    - name: Disable DNSStubListener
-      copy:
-        dest: /etc/systemd/resolved.conf.d/adguardhome.conf
-        content: |
-          [Resolve]
-          DNS=127.0.0.1
-          DNSStubListener=no
+    - name: Generate service configs from templates
+      template:
+        src: "{{ item.path }}"
+        # Maps the local relative path to the remote path
+        dest: "{{ remote_services_dir }}/services/{{ item.path | relpath(services_dir) | regex_replace('.j2$', '') }}"
         mode: "0644"
+      loop: "{{ local_templates.files }}"
 
-    - name: Activate symlinked resolv.conf
-      file:
-        src: /run/systemd/resolve/resolv.conf
-        dest: /etc/resolv.conf
-        state: link
-        force: true
+    - name: Configure systemd-resolved for AdGuardHome
+      block:
+        - name: Create systemd-resolved config directory
+          file:
+            path: /etc/systemd/resolved.conf.d
+            state: directory
+            mode: "0755"
 
-    - name: Restart systemd-resolved
-      systemd:
-        name: systemd-resolved
-        state: restarted
+        - name: Disable DNSStubListener
+          copy:
+            dest: /etc/systemd/resolved.conf.d/adguardhome.conf
+            content: |
+              [Resolve]
+              DNS=127.0.0.1
+              DNSStubListener=no
+            mode: "0644"
+
+        - name: Activate symlinked resolv.conf
+          file:
+            src: /run/systemd/resolve/resolv.conf
+            dest: /etc/resolv.conf
+            state: link
+            force: true
+
+        - name: Restart systemd-resolved
+          systemd:
+            name: systemd-resolved
+            state: restarted
 
     - name: Deploy all services
       community.docker.docker_compose_v2:

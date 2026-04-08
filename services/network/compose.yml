@@ -21,9 +21,6 @@ services:
       - traefik.http.routers.adguard.tls=true
       - traefik.http.routers.adguard.entryPoints=websecure
       - traefik.http.routers.adguard.rule=Host(`adguard.${DOMAIN}`)
-      - traefik.http.routers.adguard.tls.certresolver=desec
-      - traefik.http.routers.adguard.tls.domains[0].main=${DOMAIN}
-      - traefik.http.routers.adguard.tls.domains[0].sans=*.${DOMAIN}
       - traefik.http.services.adguard.loadbalancer.server.port=80
   ddns-updater:
     image: qmcgaw/ddns-updater:v2.8
@@ -45,9 +42,6 @@ services:
       - traefik.http.routers.ddns-updater.tls=true
       - traefik.http.routers.ddns-updater.entryPoints=websecure
       - traefik.http.routers.ddns-updater.rule=Host(`ddns-updater.${DOMAIN}`)
-      - traefik.http.routers.ddns-updater.tls.certresolver=desec
-      - traefik.http.routers.ddns-updater.tls.domains[0].main=${DOMAIN}
-      - traefik.http.routers.ddns-updater.tls.domains[0].sans=*.${DOMAIN}
     networks:
       - proxy
     restart: unless-stopped
@@ -71,9 +65,6 @@ services:
       - traefik.http.routers.traefik.rule=Host(`traefik.${DOMAIN}`)
       - traefik.http.routers.traefik.service=api@internal
       - traefik.http.routers.traefik.tls=true
-      - traefik.http.routers.traefik.tls.certresolver=desec
-      - traefik.http.routers.traefik.tls.domains[0].main=${DOMAIN}
-      - traefik.http.routers.traefik.tls.domains[0].sans=*.${DOMAIN}
     restart: unless-stopped
 networks:
   proxy:
