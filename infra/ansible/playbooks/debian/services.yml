@@ -3,51 +3,58 @@
   hosts: debian
   become: true
   vars:
-    secrets_dir: "{{ playbook_dir }}/../../../../secrets"
-    services_dir: "{{ playbook_dir }}/../../../../services"
-
+    services_dir: "{{ (playbook_dir + '/../../../../services') | realpath }}"
     remote_services_dir: .
-
-    shared_env_content: "{{ lookup('community.sops.sops', secrets_dir + '/services/shared.sops') }}"
+    shared_env_content: "{{ lookup('community.sops.sops', services_dir + '/env.sops') }}"
     domain: "{{ shared_env_content | regex_search('DOMAIN=(.*)', '\\1') | first }}"
     email: "{{ shared_env_content | regex_search('EMAIL=(.*)', '\\1') | first }}"
+
+  handlers:
+    - name: Restart systemd-resolved
+      systemd:
+        name: systemd-resolved
+        state: restarted
+
   tasks:
-    - name: Copy services
+    - name: Copy all static files
       copy:
-        src: "{{ services_dir }}"
-        dest: "{{ remote_services_dir }}"
+        src: "{{ services_dir }}/"
+        dest: "{{ remote_services_dir }}/services"
         mode: "0644"
 
-    - name: Decrypt and copy service shared env file
-      copy:
-        content: "{{ lookup('community.sops.sops', secrets_dir + '/services/shared.sops') }}"
-        dest: "{{ remote_services_dir }}/services/shared.env"
-        mode: "0600"
-
-    - name: Decrypt and copy service env files
-      copy:
-        content: "{{ lookup('community.sops.sops', secrets_dir + '/services/' + item + '.sops') }}"
-        dest: "{{ remote_services_dir }}/services/{{ item }}/.env"
-        mode: "0600"
-      loop:
-        - network
-
-    - name: Find config templates locally
+    - name: Find all service files
       delegate_to: localhost
       become: false
       find:
         paths: "{{ services_dir }}"
-        patterns: "*.yml.j2"
         recurse: yes
-      register: local_templates
+        patterns:
+          - "*.sops"
+          - "*.j2"
+      register: service_files
 
-    - name: Generate service configs from templates
-      template:
-        src: "{{ item.path }}"
-        # Maps the local relative path to the remote path
-        dest: "{{ remote_services_dir }}/services/{{ item.path | relpath(services_dir) | regex_replace('.j2$', '') }}"
+    - name: Decrypt and copy sops files
+      copy:
+        content: "{{ lookup('community.sops.sops', item.path) }}"
+        dest: "{{ remote_services_dir }}/services/{{ item.path | replace(services_dir + '/', '') | regex_replace('\\.sops$', '') }}"
+        mode: "0600"
+      loop: "{{ service_files.files }}"
+      when: item.path.endswith('.sops')
+      no_log: true
+
+    - name: Render and copy j2 templates
+      copy:
+        content: "{{ lookup('template', item.path) }}"
+        dest: "{{ remote_services_dir }}/services/{{ item.path | replace(services_dir + '/', '') | regex_replace('\\.j2$', '') }}"
         mode: "0644"
-      loop: "{{ local_templates.files }}"
+      loop: "{{ service_files.files }}"
+      when: item.path.endswith('.j2')
+
+    - name: Remove sops and j2 files from remote
+      file:
+        path: "{{ remote_services_dir }}/services/{{ item.path | replace(services_dir + '/', '') }}"
+        state: absent
+      loop: "{{ service_files.files }}"
 
     - name: Configure systemd-resolved for AdGuardHome
       block:
@@ -66,17 +73,16 @@
               DNSStubListener=no
             mode: "0644"
 
-        - name: Activate symlinked resolv.conf
+        - name: Link resolv.conf and restart
           file:
             src: /run/systemd/resolve/resolv.conf
             dest: /etc/resolv.conf
             state: link
             force: true
+          notify: Restart systemd-resolved
 
-        - name: Restart systemd-resolved
-          systemd:
-            name: systemd-resolved
-            state: restarted
+    - name: Force DNS restart before Docker deployment
+      meta: flush_handlers
 
     - name: Deploy all services
       community.docker.docker_compose_v2:
@@ -85,4 +91,4 @@
         state: present
         remove_orphans: true
         env_files:
-          - ./shared.env
+          - env
