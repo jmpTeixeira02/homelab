@@ -19,24 +19,12 @@ entryPoints:
     http:
       tls:
         certResolver: desec
-        domains:
-          - main: "{{ domain }}"
-            sans:
-              - "*.{{ domain }}"
-
+       
 providers:
   docker:
     endpoint: "unix:///var/run/docker.sock"
     exposedByDefault: false
-tls:
-  stores:
-    default:
-      defaultGeneratedCert:
-        resolver: desec
-        domain:
-          main: "{{ domain }}"
-          sans:
-            - "*.{{ domain }}"
+
 certificatesResolvers:
   desec:
     acme:

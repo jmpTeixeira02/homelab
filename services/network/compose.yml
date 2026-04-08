@@ -19,6 +19,9 @@ services:
     labels:
       - traefik.enable=true
       - traefik.http.routers.adguard.tls=true
+      - traefik.http.routers.adguard.tls.certresolver=desec
+      - traefik.http.routers.adguard.tls.domains[0].main=${DOMAIN}
+      - traefik.http.routers.adguard.tls.domains[0].sans=*.${DOMAIN}
       - traefik.http.routers.adguard.entryPoints=websecure
       - traefik.http.routers.adguard.rule=Host(`adguard.${DOMAIN}`)
       - traefik.http.services.adguard.loadbalancer.server.port=80
@@ -40,11 +43,40 @@ services:
     labels:
       - traefik.enable=true
       - traefik.http.routers.ddns-updater.tls=true
+      - traefik.http.routers.ddns-updater.tls.certresolver=desec
+      - traefik.http.routers.ddns-updater.tls.domains[0].main=${DOMAIN}
+      - traefik.http.routers.ddns-updater.tls.domains[0].sans=*.${DOMAIN}
       - traefik.http.routers.ddns-updater.entryPoints=websecure
       - traefik.http.routers.ddns-updater.rule=Host(`ddns-updater.${DOMAIN}`)
+      - traefik.http.routers.ddns-updater.middlewares=authelia@docker
     networks:
       - proxy
     restart: unless-stopped
+  authelia:
+    image: authelia/authelia
+    container_name: authelia
+    networks:
+      - proxy
+    environment:
+      - AUTHELIA_JWT_SECRET=${AUTHELIA_JWT_SECRET}
+      - AUTHELIA_SESSION_SECRET=${AUTHELIA_SESSION_SECRET}
+      - AUTHELIA_STORAGE_ENCRYPTION_KEY=${AUTHELIA_STORAGE_ENCRYPTION_KEY}
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.authelia.entryPoints=websecure
+      - traefik.http.routers.authelia.rule=Host(`auth.${DOMAIN}`)
+      - traefik.http.routers.authelia.tls=true
+      - traefik.http.routers.authelia.tls.certresolver=desec
+      - traefik.http.routers.authelia.tls.domains[0].main=${DOMAIN}
+      - traefik.http.routers.authelia.tls.domains[0].sans=*.${DOMAIN}
+
+      - traefik.http.middlewares.authelia.forwardAuth.address=http://authelia:9091/api/authz/forward-auth
+      - traefik.http.middlewares.authelia.forwardAuth.trustForwardHeader=true
+      - traefik.http.middlewares.authelia.forwardAuth.authResponseHeaders=Remote-User,Remote-Groups,Remote-Email,Remote-Nam
+    restart: unless-stopped
+    volumes:
+      - ./config/authelia.yml:/config/configuration.yml:ro
+      - ./data/authelia:/config/
   traefik:
     image: traefik:v3.6
     container_name: traefik
@@ -54,7 +86,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./config/traefik.yml:/etc/traefik/traefik.yml:ro
-      - ./data/certs/:/var/traefik/certs/:rw
+      - ./data/traefik/certs/:/var/traefik/certs/:rw
     environment:
       - DESEC_TOKEN=${DESEC_TOKEN}
     networks:
@@ -65,6 +97,11 @@ services:
       - traefik.http.routers.traefik.rule=Host(`traefik.${DOMAIN}`)
       - traefik.http.routers.traefik.service=api@internal
       - traefik.http.routers.traefik.tls=true
+      - traefik.http.routers.traefik.tls.certresolver=desec
+      - traefik.http.routers.traefik.tls.domains[0].main=${DOMAIN}
+      - traefik.http.routers.traefik.tls.domains[0].sans=*.${DOMAIN}
+
+      - traefik.http.routers.traefik.middlewares=authelia@docker
     restart: unless-stopped
 networks:
   proxy:
