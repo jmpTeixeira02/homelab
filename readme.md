@@ -36,6 +36,14 @@ It has affinity with services that have HW Acceleration
 - Ansible for service deployment
 
 # Setup 
+- Install Proxmox on the clusters
+- Create a key pair in ~/.ssh/homelab on the remote machine
+- Create a key pair `ssh-keygen -t ed25519 -f ~/.ssh/homelab -C "homelab"`
+- Copy the key to the proxmox host `ssh-copy-id -i ~/.ssh/homelab.pub root@192.168.1.88`
+- Run make init-proxmox
+- Run make init-debian
+
+## Notes
 This repo contains a vault using [SOPS](https://github.com/getsops/sops) and [Age](https://github.com/FiloSottile/age)
 - To use ensure the private key is stored in `$XDG_CONFIG_HOME/sops/age/keys.txt`
 - To edit the secrets use `sops edit <file>`

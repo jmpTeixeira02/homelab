@@ -1,4 +1,2 @@
-_secrets: "{{ lookup('community.sops.sops', playbook_dir + '../../../../../infra/env.sops') | from_json }}"
-ansible_user: "{{ _secrets['clusters_access'][cluster]['node_user'] }}"
-ansible_password: "{{ _secrets['clusters_access'][cluster]['node_password'] }}"
-ansible_become_password: "{{ _secrets['clusters_access'][cluster]['node_password'] }}"
+_git_repo_root: "{{ lookup('pipe', 'git rev-parse --show-toplevel') }}"
+_secrets: "{{ lookup('community.sops.sops', _git_repo_root + '/infra/env.sops') | from_json }}"

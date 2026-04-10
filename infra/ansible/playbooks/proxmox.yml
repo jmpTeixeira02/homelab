@@ -1,3 +1,18 @@
+---
+- name: Extract Hosts from SOPS
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Dynamically add Proxmox hosts
+      add_host:
+        name: "{{ item.key }}"
+        groups: proxmox_nodes
+        ansible_user: root
+        cluster_name: "{{ item.key }}"
+        ansible_host: "{{ item.value.ip }}"
+      loop: "{{ _secrets['clusters_access'] | dict2items }}"
+      when: item.value.ip is defined
+      no_log: true
 - name: Setup Proxmox
   hosts: proxmox_nodes
   gather_facts: true
@@ -9,10 +24,5 @@
 
     pve_iommu_passthrough_mode: true
     pve_mediated_devices_enabled: true
-  tasks:
-    - name: Load encrypted secrets
-      community.sops.load_vars:
-        file: secrets.yaml
-      no_log: true
   roles:
     - role: lae.proxmox

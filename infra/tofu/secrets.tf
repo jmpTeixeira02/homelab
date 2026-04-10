@@ -1,5 +1,6 @@
 data "sops_file" "secrets" {
-  source_file = "../../secrets/cluster.sops"
+  source_file = "../env.sops"
+  input_type  = "raw"
 }
 
 locals {

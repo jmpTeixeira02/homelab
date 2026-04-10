@@ -1,7 +1,5 @@
-all:
-  children:
-    debian:
-      hosts:
+debian:
+    hosts:
 %{ for name, node in nodes ~}
         ${name}:
           ansible_host: ${node.ip}
