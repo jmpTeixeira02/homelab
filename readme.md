@@ -43,5 +43,4 @@ This repo contains a vault using [SOPS](https://github.com/getsops/sops) and [Ag
 
 # TODO 
 - Enable DNS over TLS Encryption on Adguard
-- Add Authelia
 - Add Missing Services

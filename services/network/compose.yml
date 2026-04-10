@@ -18,10 +18,6 @@ services:
       - ./config/adguard:/opt/adguardhome/conf
     labels:
       - traefik.enable=true
-      - traefik.http.routers.adguard.tls=true
-      - traefik.http.routers.adguard.tls.certresolver=desec
-      - traefik.http.routers.adguard.tls.domains[0].main=${DOMAIN}
-      - traefik.http.routers.adguard.tls.domains[0].sans=*.${DOMAIN}
       - traefik.http.routers.adguard.entryPoints=websecure
       - traefik.http.routers.adguard.rule=Host(`adguard.${DOMAIN}`)
       - traefik.http.services.adguard.loadbalancer.server.port=80
@@ -42,13 +38,8 @@ services:
         }
     labels:
       - traefik.enable=true
-      - traefik.http.routers.ddns-updater.tls=true
-      - traefik.http.routers.ddns-updater.tls.certresolver=desec
-      - traefik.http.routers.ddns-updater.tls.domains[0].main=${DOMAIN}
-      - traefik.http.routers.ddns-updater.tls.domains[0].sans=*.${DOMAIN}
       - traefik.http.routers.ddns-updater.entryPoints=websecure
       - traefik.http.routers.ddns-updater.rule=Host(`ddns-updater.${DOMAIN}`)
-      - traefik.http.routers.ddns-updater.middlewares=authelia@docker
     networks:
       - proxy
     restart: unless-stopped
@@ -65,10 +56,6 @@ services:
       - traefik.enable=true
       - traefik.http.routers.authelia.entryPoints=websecure
       - traefik.http.routers.authelia.rule=Host(`auth.${DOMAIN}`)
-      - traefik.http.routers.authelia.tls=true
-      - traefik.http.routers.authelia.tls.certresolver=desec
-      - traefik.http.routers.authelia.tls.domains[0].main=${DOMAIN}
-      - traefik.http.routers.authelia.tls.domains[0].sans=*.${DOMAIN}
 
       - traefik.http.middlewares.authelia.forwardAuth.address=http://authelia:9091/api/authz/forward-auth
       - traefik.http.middlewares.authelia.forwardAuth.trustForwardHeader=true
@@ -83,6 +70,8 @@ services:
     ports:
       - "443:443"
       - "8080:8080"
+    dns:
+      - 1.1.1.1
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./config/traefik.yml:/etc/traefik/traefik.yml:ro
@@ -96,12 +85,7 @@ services:
       - traefik.http.routers.traefik.entryPoints=websecure
       - traefik.http.routers.traefik.rule=Host(`traefik.${DOMAIN}`)
       - traefik.http.routers.traefik.service=api@internal
-      - traefik.http.routers.traefik.tls=true
-      - traefik.http.routers.traefik.tls.certresolver=desec
-      - traefik.http.routers.traefik.tls.domains[0].main=${DOMAIN}
-      - traefik.http.routers.traefik.tls.domains[0].sans=*.${DOMAIN}
 
-      - traefik.http.routers.traefik.middlewares=authelia@docker
     restart: unless-stopped
 networks:
   proxy:

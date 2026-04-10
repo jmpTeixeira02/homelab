@@ -19,6 +19,13 @@ entryPoints:
     http:
       tls:
         certResolver: desec
+        domains:
+          - main: "{{ domain }}"
+            sans:
+              - "*.{{ domain }}"
+      middlewares:
+        - authelia@docker
+
        
 providers:
   docker:
@@ -30,14 +37,10 @@ certificatesResolvers:
     acme:
       email: {{ email }}
       storage: /var/traefik/certs/desec.json
+      caServer: https://acme-v02.api.letsencrypt.org/directory
       dnsChallenge:
         provider: desec
-        disablePropagationCheck: true
-        delayBeforeCheck: 60
         resolvers:
           - "ns1.desec.io:53"
           - "ns2.desec.org:53"
-          - "8.8.8.8:53" # Google
-          - "8.8.4.4:53" # Google
-          - "1.1.1.1:53" # Cloudflare
-          - "1.0.0.1:53" # Cloudflare
+          - "1.1.1.1:53"
