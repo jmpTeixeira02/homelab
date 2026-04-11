@@ -1,3 +1,1 @@
 ansible_user: "{{ _secrets['clusters_access'][cluster]['node_user'] }}"
-ansible_password: "{{ _secrets['clusters_access'][cluster]['node_password'] }}"
-ansible_become_password: "{{ _secrets['clusters_access'][cluster]['node_password'] }}"

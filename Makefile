@@ -26,3 +26,11 @@ init-proxmox:
 # Initiates debian VM and starts it's services
 init-debian:
 	cd $(ANSIBLE_DIR) && ansible-playbook playbooks/debian/debian.yml
+
+# Syncs files on debian VM
+sync-debian:
+	cd $(ANSIBLE_DIR) && ansible-playbook playbooks/debian/debian.yml --tags sync
+
+# Reruns deployments on debian VM
+deploy-debian:
+	cd $(ANSIBLE_DIR) && ansible-playbook playbooks/debian/debian.yml --tags deploy
