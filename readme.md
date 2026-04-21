@@ -10,12 +10,12 @@ It has affinity with services that are RAM heavy
 - 256GB Management SSD
 - 2TB HDD Storage
 - OS: Proxmox
-    - OpenMediaVault VM
-    - Services VM - Debian Bookworm
+    - Core VM - Debian Bookworm
         - Network Infra (NetBird, Traefik, Adguard, Authelia, DDNS-Updater)
         - ArrStack (Sonarr, Radarr, Prowlarr, qBitTorrent, Bazarr)
         - Immich Server
         - Monitoring Stack
+        - NAS
     - Lab VMs
 
 ### Processing Node
@@ -50,5 +50,17 @@ This repo contains a vault using [SOPS](https://github.com/getsops/sops) and [Ag
 
 
 # TODO 
+- Automatic Adguard Config
+    - For now need to go to port 3000 over HTTP for initial setup
 - Enable DNS over TLS Encryption on Adguard
-- Add Missing Services
+- Core
+    - Add Netbird
+    - Add Sonarr, Radarr, Prowlarr, qBitTorrent, Bazarr
+    - Add Loki, Graphana, Prometheus using OpenTolemetry
+    - Add Immich Server
+    - Samba Server
+    - Open Printer CUPS
+- Processing Node
+    - Add Jellyfin
+    - Add Paperless NgX
+    - Add Immich AI Worker

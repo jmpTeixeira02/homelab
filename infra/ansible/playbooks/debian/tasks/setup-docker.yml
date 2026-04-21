@@ -50,3 +50,6 @@
     name: "{{ ansible_user }}"
     groups: docker
     append: true
+
+- name: Refresh SSH session to recognize new group
+  meta: reset_connection
