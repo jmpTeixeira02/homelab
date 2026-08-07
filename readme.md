@@ -39,7 +39,22 @@ It has affinity with services that have HW Acceleration
 - Install Proxmox on the clusters
 - Create a key pair in ~/.ssh/homelab on the remote machine
 - Create a key pair `ssh-keygen -t ed25519 -f ~/.ssh/homelab -C "homelab"`
-- Copy the key to the proxmox host `ssh-copy-id -i ~/.ssh/homelab.pub root@192.168.1.88`
+- Copy the key to the proxmox host `ssh-copy-id -i ~/.ssh/homelab.pub root@<proxmox-ip>`
+- Run make tofu apply
+- Add the hosts to `~/.ssh/config`
+```
+Host <proxmox-ip>
+    HostName <proxmox-ip>
+    User root
+    IdentityFile ~/.ssh/homelab
+    IdentitiesOnly yes
+
+Host <vm-ip>
+    HostName <vm-ip>
+    User core
+    IdentityFile ~/.ssh/homelab
+    IdentitiesOnly yes
+```
 - Run make init-proxmox
 - Run make init-debian
 
