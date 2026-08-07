@@ -12,6 +12,6 @@ nodes = {
 clusters = {
     "core" = {
         gateway = "192.168.1.254"
-        datacenter = "proxmox"
+        datacenter = "pve"
     }
 }
