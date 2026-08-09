@@ -1,1 +1,0 @@
-ansible_user: "{{ _secrets['clusters_access'][cluster]['node_user'] }}"

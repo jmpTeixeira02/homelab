@@ -1,0 +1,11 @@
+[Match]
+Name={{ item.name }}
+
+[Network]
+Address={{ item.address }}
+{% if item.gateway is defined %}
+Gateway={{ item.gateway }}
+{% endif %}
+{% for dns in item.dns %}
+DNS={{ dns }}
+{% endfor %}

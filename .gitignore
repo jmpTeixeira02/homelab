@@ -1,8 +1,5 @@
-# Terraform
+# OpenTofu
 .terraform/
 .terraform.lock.hcl
 *.tfstate
 *.tfstate.*
-
-# Ansible 
-generated/

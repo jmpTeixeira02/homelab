@@ -1,0 +1,87 @@
+---
+- name: Setup Debian Machine
+  hosts: setup-core
+  handlers:
+    - name: Restart systemd-networkd
+      systemd_service:
+        name: systemd-networkd
+        state: restarted
+
+    - name: Restart systemd-resolved
+      systemd_service:
+        name: systemd-resolved
+        state: restarted
+
+    - name: Restart SSH
+      systemd_service:
+        name: ssh
+        state: restarted
+
+  tasks:
+    - name: Setup Docker
+      import_tasks: tasks/setup-docker.yml
+
+    - name: Install DNS Resolver
+      apt:
+        name:
+          - systemd-resolved
+        state: present
+        update_cache: true
+
+    - name: Write systemd-networkd interface config
+      template:
+        src: network.j2
+        dest: "/etc/systemd/network/10-{{ item.name }}.network"
+        mode: "0644"
+      loop: "{{ network_interfaces }}"
+      notify: Restart systemd-networkd
+
+    - name: Enable and start systemd-networkd
+      systemd:
+        name: systemd-networkd
+        enabled: true
+        state: started
+
+    - name: Stop and disable legacy networking
+      systemd:
+        name: networking
+        state: stopped
+        enabled: false
+      ignore_errors: true
+
+    - name: Purge ifupdown package
+      apt:
+        name: ifupdown
+        state: absent
+        purge: true
+
+    - name: Create systemd-resolved config directory
+      file:
+        path: /etc/systemd/resolved.conf.d
+        state: directory
+        mode: "0755"
+
+    - name: Configure systemd-resolved for AdGuard Home
+      copy:
+        dest: /etc/systemd/resolved.conf.d/adguardhome.conf
+        content: |
+          [Resolve]
+          DNS=127.0.0.1
+          DNSStubListener=no
+        mode: "0644"
+      notify: Restart systemd-resolved
+
+    - name: Link resolv.conf to systemd-resolved uplink config
+      file:
+        src: /run/systemd/resolve/resolv.conf
+        dest: /etc/resolv.conf
+        state: link
+        force: true
+
+    - name: Disable SSH password authentication
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^#?PasswordAuthentication\s+'
+        line: "PasswordAuthentication no"
+        state: present
+      notify: Restart SSH

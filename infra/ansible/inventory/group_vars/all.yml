@@ -1,2 +1,0 @@
-_git_repo_root: "{{ lookup('pipe', 'git rev-parse --show-toplevel') }}"
-_secrets: "{{ lookup('community.sops.sops', _git_repo_root + '/infra/env.sops') | from_json }}"
