@@ -1,0 +1,33 @@
+---
+- name: Setup Debian Machine
+  hosts: setup-core
+  force_handlers: true
+
+  handlers:
+    - name: Restart networking
+      ansible.builtin.command:
+        cmd: systemctl restart networking
+
+    - name: Restart SSH
+      ansible.builtin.systemd_service:
+        name: ssh
+        state: restarted
+
+  tasks:
+    - name: Write static IP config
+      ansible.builtin.template:
+        src: network.j2
+        dest: /etc/network/interfaces
+        mode: "0644"
+      notify: Restart networking
+
+    - name: Disable SSH password authentication
+      ansible.builtin.lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^#?PasswordAuthentication\s+'
+        line: "PasswordAuthentication no"
+        state: present
+      notify: Restart SSH
+
+    - name: Setup Docker
+      ansible.builtin.import_tasks: tasks/setup-docker.yml

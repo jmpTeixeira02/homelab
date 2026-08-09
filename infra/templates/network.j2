@@ -1,0 +1,13 @@
+{% for interface in network_interfaces %}
+auto {{ interface.name }}
+iface {{ interface.name }} inet static
+    address {{ interface.address }}
+    netmask {{ interface.netmask }}
+{% if interface.gateway is defined %}
+    gateway {{ interface.gateway }}
+{% endif %}
+{% if interface.dns_servers is defined %}
+    dns-nameservers {{ interface.dns_servers | join(' ') }}
+{% endif %}
+
+{% endfor %}

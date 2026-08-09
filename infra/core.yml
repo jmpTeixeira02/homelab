@@ -1,28 +1,24 @@
 ---
-- name: Setup Debian Machine
-  hosts: debian
-  become: true
+- name: Setup core machine
+  hosts: core
   gather_facts: true
   vars:
-    services_dir: "{{ (playbook_dir + '/../../../../services') | realpath }}"
-    remote_services_dir: .
+    services_dir: "{{ (playbook_dir + '/../services') | realpath }}"
+    remote_services_dir: "{{ ansible_facts.env.HOME }}"
     shared_env_content: "{{ lookup('community.sops.sops', services_dir + '/env.sops') }}"
     domain: "{{ shared_env_content | regex_search('DOMAIN=(.*)', '\\1') | first }}"
     email: "{{ shared_env_content | regex_search('EMAIL=(.*)', '\\1') | first }}"
   handlers:
-    - name: Restart systemd-resolved
+    - name: restart systemd-resolved
       systemd:
         name: systemd-resolved
         state: restarted
   tasks:
-    - name: Setup Docker
-      ansible.builtin.import_tasks: tasks/setup-docker.yml
     - name: Sync files
       ansible.builtin.import_tasks: tasks/sync_files.yml
-      tags: [sync, deploy]
-    - name: Prepare AdGuardHome
-      ansible.builtin.import_tasks: tasks/prepare_adguard.yml
-      tags: [deploy]
+      tags:
+        - sync
+        - deploy
     - name: Deploy all services
       community.docker.docker_compose_v2:
         project_src: "{{ remote_services_dir }}/services"
@@ -31,4 +27,5 @@
         remove_orphans: true
         env_files:
           - env
-      tags: [deploy]
+      tags:
+        - deploy

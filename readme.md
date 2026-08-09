@@ -31,32 +31,21 @@ It has affinity with services that have HW Acceleration
     - Dashboard
 
 ## Technologies
-- Ansible for Proxmox Initial Setup
-- OpenTofu to create VMs and LXCs in Proxmox
+- Ansible for Docker Services Setup
+- OpenTofu to create Lab VMs
 - Ansible for service deployment
 
 # Setup 
-- Install Proxmox on the clusters
-- Create a key pair in ~/.ssh/homelab on the remote machine
+- Install Debian on the Server
 - Create a key pair `ssh-keygen -t ed25519 -f ~/.ssh/homelab -C "homelab"`
-- Copy the key to the proxmox host `ssh-copy-id -i ~/.ssh/homelab.pub root@<proxmox-ip>`
-- Run make tofu apply
-- Add the hosts to `~/.ssh/config`
-```
-Host <proxmox-ip>
-    HostName <proxmox-ip>
-    User root
-    IdentityFile ~/.ssh/homelab
-    IdentitiesOnly yes
-
-Host <vm-ip>
-    HostName <vm-ip>
-    User core
-    IdentityFile ~/.ssh/homelab
-    IdentitiesOnly yes
-```
-- Run make init-proxmox
-- Run make init-debian
+- Copy the key to the server user `ssh-copy-id -i ~/.ssh/homelab.pub user@<ip>`
+- Run Ansible Setup Script on Server (might need to install git first)
+    ```
+    apt install -y git ansible make
+    git clone https://www.github.com/jmpTeixeira02/homelab
+    cd homelab && make setup
+    ```
+- Run make 
 
 ## Notes
 This repo contains a vault using [SOPS](https://github.com/getsops/sops) and [Age](https://github.com/FiloSottile/age)
@@ -65,6 +54,7 @@ This repo contains a vault using [SOPS](https://github.com/getsops/sops) and [Ag
 
 
 # TODO 
+- Create Pre-Seed Script for Debian install
 - Automatic Adguard Config
     - For now need to go to port 3000 over HTTP for initial setup
 - Enable DNS over TLS Encryption on Adguard

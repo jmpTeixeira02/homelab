@@ -1,36 +1,15 @@
 .PHONY: ansible 
 
-ANSIBLE_DIR := "infra/ansible"
-TOFU_DIR := "infra/tofu"
+ANSIBLE_DIR := "infra"
 
-tofu-init:
-	cd $(TOFU_DIR) && tofu init
+setup:
+	cd infra && ansible-playbook setup.yml -K
 
-tofu-plan: 
-	cd $(TOFU_DIR) && tofu plan 
+core-deploy-and-sync:
+	cd infra && ansible-playbook core.yml
 
-tofu-apply:
-	cd $(TOFU_DIR) && tofu apply \
-	-auto-approve
+core-sync:
+	cd infra && ansible-playbook core.yml --tags sync
 
-tofu-destroy:
-	cd $(TOFU_DIR) && tofu destroy \
-	-auto-approve
-
-# Runs post-install proxmox script and hw passthrough
-init-proxmox: 
-	ansible-galaxy install lae.proxmox
-	ansible-galaxy collection install community.sops
-	cd $(ANSIBLE_DIR) && ansible-playbook playbooks/proxmox.yml
-
-# Initiates debian VM and starts it's services
-init-debian:
-	cd $(ANSIBLE_DIR) && ansible-playbook playbooks/debian/debian.yml
-
-# Syncs files on debian VM
-sync-debian:
-	cd $(ANSIBLE_DIR) && ansible-playbook playbooks/debian/debian.yml --tags sync
-
-# Reruns deployments on debian VM
-deploy-debian:
-	cd $(ANSIBLE_DIR) && ansible-playbook playbooks/debian/debian.yml --tags deploy
+core-deploy:
+	cd infra && ansible-playbook core.yml --tags deploy
