@@ -80,6 +80,8 @@ services:
       - ./data/traefik/certs/:/var/traefik/certs/:rw
     environment:
       - DESEC_TOKEN=${DESEC_TOKEN}
+      - DESEC_POLLING_INTERVAL=75
+      - DESEC_PROPAGATION_TIMEOUT=300
     networks:
       - proxy
     labels:
