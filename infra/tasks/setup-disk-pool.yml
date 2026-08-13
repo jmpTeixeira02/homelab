@@ -1,0 +1,52 @@
+- name: Install dependencies
+  ansible.builtin.apt:
+    name:
+      - mergerfs
+      - e2fsprogs
+    state: present
+    update_cache: true
+
+- name: Format each drive with ext4
+  community.general.filesystem:
+    fstype: ext4
+    dev: "{{ item.device }}"
+    opts: "-L {{ item.label }}"
+  loop: "{{ storage.disks }}"
+  tags:
+    - never
+
+- name: Create mount point for each drive
+  ansible.builtin.file:
+    path: "{{ item.mount }}"
+    state: directory
+    mode: "0755"
+  loop: "{{ storage.disks }}"
+
+- name: Get UUID for each drive
+  ansible.builtin.command: "/usr/sbin/blkid -s UUID -o value {{ item.device }}"
+  register: disk_uuids
+  changed_when: false
+  loop: "{{ storage.disks }}"
+
+- name: Mount each drive persistently via fstab
+  ansible.posix.mount:
+    path: "{{ item.item.mount }}"
+    src: "UUID={{ item.stdout }}"
+    fstype: ext4
+    opts: defaults
+    state: mounted
+  loop: "{{ disk_uuids.results }}"
+
+- name: Create pool mount point
+  ansible.builtin.file:
+    path: "{{ storage.pool_mount }}"
+    state: directory
+    mode: "0755"
+
+- name: Mount mergerfs pool persistently via fstab
+  ansible.posix.mount:
+    path: "{{ storage.pool_mount }}"
+    src: "{{ storage.disks | map(attribute='mount') | join(':') }}"
+    fstype: fuse.mergerfs
+    opts: "{{ storage.mergerfs_opts }}"
+    state: mounted

@@ -85,3 +85,6 @@
         line: "PasswordAuthentication no"
         state: present
       notify: Restart SSH
+
+    - name: Setup Disk Pool
+      ansible.builtin.import_tasks: tasks/setup-disk-pool.yml

@@ -1,9 +1,8 @@
-.PHONY: ansible 
-
-ANSIBLE_DIR := "infra"
-
 setup:
 	cd infra && ansible-playbook setup.yml -K
+
+setup-format-disk:
+	cd infra && ansible-playbook setup.yml -K --tags never
 
 core-deploy-and-sync:
 	cd infra && ansible-playbook core.yml

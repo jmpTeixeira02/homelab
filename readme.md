@@ -8,7 +8,8 @@ It has affinity with services that are RAM heavy
 - i7-4790k
 - 42GB RAM DDR3
 - 256GB Management SSD
-- 2TB HDD Storage
+- Multiple HDD Storage Drives
+    - Use mergerfs to use drives as one in the NAS
 - OS: Debian
     - Network Infra (NetBird, Traefik, Adguard, Authelia, DDNS-Updater)
     - ArrStack (Sonarr, Radarr, Prowlarr, qBitTorrent, Bazarr)
@@ -49,6 +50,9 @@ It has affinity with services that have HW Acceleration
 ## Notes
 This repo contains a vault using [SOPS](https://github.com/getsops/sops) and [Age](https://github.com/FiloSottile/age)
 - To use ensure the private key is stored in `$XDG_CONFIG_HOME/sops/age/keys.txt`
+
+There is no Drive Raid/Backup mechanism
+- When removing drives migrate first before removing drive
 
 
 # TODO 
