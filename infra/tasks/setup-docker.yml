@@ -1,5 +1,5 @@
 - name: Install dependencies
-  apt:
+  ansible.builtin.apt:
     name:
       - ca-certificates
       - curl
@@ -7,19 +7,20 @@
     update_cache: true
 
 - name: Create keyrings directory
-  file:
+  ansible.builtin.file:
     path: /etc/apt/keyrings
     state: directory
     mode: "0755"
 
 - name: Download Docker GPG key
-  get_url:
+  ansible.builtin.get_url:
     url: https://download.docker.com/linux/debian/gpg
     dest: /etc/apt/keyrings/docker.asc
     mode: "0444"
 
 - name: Add Docker apt repository
-  copy:
+  ansible.builtin.copy:
+    mode: '0644'
     dest: /etc/apt/sources.list.d/docker.sources
     content: |
       Types: deb
@@ -29,7 +30,7 @@
       Signed-By: /etc/apt/keyrings/docker.asc
 
 - name: Install Docker packages
-  apt:
+  ansible.builtin.apt:
     name:
       - docker-ce
       - docker-ce-cli
@@ -40,16 +41,16 @@
     update_cache: true
 
 - name: Enable and start Docker
-  systemd:
+  ansible.builtin.systemd:
     name: docker
     enabled: true
     state: started
 
 - name: Add user to docker group
-  user:
+  ansible.builtin.user:
     name: "{{ user }}"
     groups: docker
     append: true
 
 - name: Refresh SSH session to recognize new group
-  meta: reset_connection
+  ansible.builtin.meta: reset_connection

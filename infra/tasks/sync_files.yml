@@ -1,6 +1,6 @@
 ---
 - name: Copy all static files
-  copy:
+  ansible.builtin.copy:
     src: "{{ repo_services_dir }}/"
     dest: "{{ remote_dir }}"
     mode: "0644"
@@ -8,16 +8,16 @@
 - name: Find all service files
   delegate_to: localhost
   become: false
-  find:
+  ansible.builtin.find:
     paths: "{{ repo_services_dir }}"
-    recurse: yes
+    recurse: true
     patterns:
       - "*.sops"
       - "*.j2"
   register: service_files
 
 - name: Decrypt and copy sops files
-  copy:
+  ansible.builtin.copy:
     content: "{{ lookup('community.sops.sops', item.path) }}"
     dest: "{{ remote_dir }}/{{ item.path | replace(repo_services_dir + '/', '') | regex_replace('\\.sops$', '') }}"
     mode: "0600"
@@ -26,7 +26,7 @@
   no_log: true
 
 - name: Render and copy j2 templates
-  copy:
+  ansible.builtin.copy:
     content: "{{ lookup('template', item.path) }}"
     dest: "{{ remote_dir }}/{{ item.path | replace(repo_services_dir + '/', '') | regex_replace('\\.j2$', '') }}"
     mode: "0644"
@@ -35,7 +35,7 @@
   no_log: true
 
 - name: Remove sops and j2 files from remote
-  file:
+  ansible.builtin.file:
     path: "{{ remote_dir }}/{{ item.path | replace(repo_services_dir + '/', '') }}"
     state: absent
   loop: "{{ service_files.files }}"

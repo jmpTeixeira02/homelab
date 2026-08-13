@@ -3,33 +3,33 @@
   hosts: setup-core
   handlers:
     - name: Restart systemd-networkd
-      systemd_service:
+      ansible.builtin.systemd_service:
         name: systemd-networkd
         state: restarted
 
     - name: Restart systemd-resolved
-      systemd_service:
+      ansible.builtin.systemd_service:
         name: systemd-resolved
         state: restarted
 
     - name: Restart SSH
-      systemd_service:
+      ansible.builtin.systemd_service:
         name: ssh
         state: restarted
 
   tasks:
     - name: Setup Docker
-      import_tasks: tasks/setup-docker.yml
+      ansible.builtin.import_tasks: tasks/setup-docker.yml
 
     - name: Install DNS Resolver
-      apt:
+      ansible.builtin.apt:
         name:
           - systemd-resolved
         state: present
         update_cache: true
 
     - name: Write systemd-networkd interface config
-      template:
+      ansible.builtin.template:
         src: network.j2
         dest: "/etc/systemd/network/10-{{ item.name }}.network"
         mode: "0644"
@@ -37,32 +37,32 @@
       notify: Restart systemd-networkd
 
     - name: Enable and start systemd-networkd
-      systemd:
+      ansible.builtin.systemd:
         name: systemd-networkd
         enabled: true
         state: started
 
     - name: Stop and disable legacy networking
-      systemd:
+      ansible.builtin.systemd:
         name: networking
         state: stopped
         enabled: false
-      ignore_errors: true
+      failed_when: false
 
     - name: Purge ifupdown package
-      apt:
+      ansible.builtin.apt:
         name: ifupdown
         state: absent
         purge: true
 
     - name: Create systemd-resolved config directory
-      file:
+      ansible.builtin.file:
         path: /etc/systemd/resolved.conf.d
         state: directory
         mode: "0755"
 
     - name: Configure systemd-resolved for AdGuard Home
-      copy:
+      ansible.builtin.copy:
         dest: /etc/systemd/resolved.conf.d/adguardhome.conf
         content: |
           [Resolve]
@@ -72,14 +72,14 @@
       notify: Restart systemd-resolved
 
     - name: Link resolv.conf to systemd-resolved uplink config
-      file:
+      ansible.builtin.file:
         src: /run/systemd/resolve/resolv.conf
         dest: /etc/resolv.conf
         state: link
         force: true
 
     - name: Disable SSH password authentication
-      lineinfile:
+      ansible.builtin.lineinfile:
         path: /etc/ssh/sshd_config
         regexp: '^#?PasswordAuthentication\s+'
         line: "PasswordAuthentication no"
