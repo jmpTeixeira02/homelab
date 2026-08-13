@@ -4,7 +4,7 @@
   gather_facts: true
   vars:
     repo_services_dir: "{{ (playbook_dir + '/../services') | realpath }}"
-    remote_dir: "{{ ansible_facts.env.HOME }}/server"
+    remote_dir: "{{ ansible_facts.env.HOME }}/homelab-core"
     shared_env_content: "{{ lookup('community.sops.sops', repo_services_dir + '/env.sops') }}"
     domain: "{{ shared_env_content | regex_search('DOMAIN=(.*)', '\\1') | first }}"
     email: "{{ shared_env_content | regex_search('EMAIL=(.*)', '\\1') | first }}"

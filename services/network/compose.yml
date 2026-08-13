@@ -67,7 +67,7 @@ services:
       - ./config/authelia.yml:/config/configuration.yml:ro
       - ./data/authelia:/config/
   traefik:
-    image: traefik:v3.6
+    image: traefik:latest
     container_name: traefik
     ports:
       - "443:443"

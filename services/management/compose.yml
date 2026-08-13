@@ -1,0 +1,19 @@
+services:
+  dockhand:
+    image: fnsys/dockhand:latest
+    container_name: dockhand
+    restart: unless-stopped
+    depends_on:
+      - traefik
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - dockhand_data:/app/data
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.dockhand.entryPoints=websecure
+      - traefik.http.routers.dockhand.rule=Host(`dockhand.${DOMAIN}`)
+    networks:
+      - proxy
+
+volumes:
+  dockhand_data:

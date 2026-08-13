@@ -3,3 +3,4 @@ include:
   - ./network/compose.yml
   - ./homepage/compose.yml
   - ./nas/compose.yml
+  - ./management/compose.yml
