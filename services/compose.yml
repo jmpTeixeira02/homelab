@@ -2,3 +2,4 @@ name: homelab
 include:
   - ./network/compose.yml
   - ./homepage/compose.yml
+  - ./nas/compose.yml

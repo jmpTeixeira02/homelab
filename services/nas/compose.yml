@@ -1,0 +1,13 @@
+services:
+  samba:
+    image: dockurr/samba
+    container_name: samba
+    environment:
+      NAME: "NAS"
+      USER: "${SMB_USER}"
+      PASS: "${SMB_PASS}"
+    ports:
+      - 445:445
+    volumes:
+      - /mnt/storage/nas:/storage
+    restart: always
