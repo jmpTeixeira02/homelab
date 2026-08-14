@@ -16,3 +16,21 @@ services:
       - traefik.enable=true
       - traefik.http.routers.prowlarr.entryPoints=websecure
       - traefik.http.routers.prowlarr.rule=Host(`prowlarr.${DOMAIN}`)
+  lidarr:
+    image: linuxserver/lidarr
+    container_name: lidarr
+    restart: always
+    volumes:
+      - ./data/lidarr:/config
+      # Optional: add media/storage mount if needed (e.g., /mnt/storage:/storage)
+    networks:
+      - proxy
+    environment:
+      - PUID=1000
+      - PGID=1000
+    ports:
+      - 8686:8686
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.lidarr.entryPoints=websecure
+      - traefik.http.routers.lidarr.rule=Host(`lidarr.${DOMAIN}`)
