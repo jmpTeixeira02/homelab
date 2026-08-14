@@ -1,0 +1,42 @@
+---
+- name: Check existing indexers
+  ansible.builtin.uri:
+    url: http://localhost:9696/api/v1/indexer
+    headers:
+      X-Api-Key: "{{ PROWLARR_API_KEY }}"
+    return_content: true
+  register: prowlarr_indexers
+  until: prowlarr_indexers.status == 200
+  retries: 5
+  delay: 3
+
+- name: Fetch indexer schemas
+  ansible.builtin.uri:
+    url: http://localhost:9696/api/v1/indexer/schema
+    headers:
+      X-Api-Key: "{{ PROWLARR_API_KEY }}"
+    return_content: true
+  register: prowlarr_schemas
+  until: prowlarr_indexers.status == 200
+  retries: 5
+  delay: 3
+  when: prowlarr.providers | difference(prowlarr_indexers.json | map(attribute='name') | list) | length > 0
+
+- name: Create missing providers
+  ansible.builtin.uri:
+    url: http://localhost:9696/api/v1/indexer
+    method: POST
+    headers:
+      X-Api-Key: "{{ PROWLARR_API_KEY }}"
+      Content-Type: application/json
+    body_format: json
+    body: >-
+      {{
+        (prowlarr_schemas.json | selectattr('name', 'equalto', item) | first)
+        | combine({'enable': true, 'appProfileId': 1})
+      }}
+    status_code: [200, 201]
+  retries: 5
+  delay: 3
+  loop: >-
+    {{ prowlarr.providers | difference(prowlarr_indexers.json | map(attribute='name') | list) }}

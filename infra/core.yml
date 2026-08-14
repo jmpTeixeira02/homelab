@@ -19,12 +19,14 @@
           ) | dict2items
         }}
       no_log: true
+      tags:
+        - always
 
     - name: Sync files
       ansible.builtin.import_tasks: tasks/sync_files.yml
       tags:
         - sync
-        - deploy
+
     - name: Deploy all services
       community.docker.docker_compose_v2:
         project_src: "{{ remote_dir }}"
@@ -35,3 +37,9 @@
           - env
       tags:
         - deploy
+
+    - name: Configure Prowlarr
+      ansible.builtin.import_tasks: tasks/media/prowlarr.yml
+      tags:
+        - deploy
+        - prowlarr

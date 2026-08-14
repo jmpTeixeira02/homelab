@@ -19,7 +19,7 @@
 
   tasks:
     - name: Setup Docker
-      ansible.builtin.import_tasks: tasks/setup-docker.yml
+      ansible.builtin.import_tasks: tasks/setup/docker.yml
 
     - name: Install DNS Resolver
       ansible.builtin.apt:
@@ -87,4 +87,4 @@
       notify: Restart SSH
 
     - name: Setup Disk Pool
-      ansible.builtin.import_tasks: tasks/setup-disk-pool.yml
+      ansible.builtin.import_tasks: tasks/setup/disk-pool.yml
