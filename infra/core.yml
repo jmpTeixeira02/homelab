@@ -5,10 +5,21 @@
   vars:
     repo_services_dir: "{{ (playbook_dir + '/../services') | realpath }}"
     remote_dir: "{{ ansible_facts.env.HOME }}/homelab-core"
-    shared_env_content: "{{ lookup('community.sops.sops', repo_services_dir + '/env.sops') }}"
-    domain: "{{ shared_env_content | regex_search('DOMAIN=(.*)', '\\1') | first }}"
-    email: "{{ shared_env_content | regex_search('EMAIL=(.*)', '\\1') | first }}"
   tasks:
+    - name: Load encrypted variables
+      ansible.builtin.set_fact:
+        "{{ item.key }}": "{{ item.value }}"
+      loop: >-
+        {{
+          dict(
+            lookup('community.sops.sops', repo_services_dir + '/env.sops').splitlines()
+            | reject('match', '^\s*#|^\s*$')
+            | map('split', '=', 1)
+            | map('map', 'trim')
+          ) | dict2items
+        }}
+      no_log: true
+
     - name: Sync files
       ansible.builtin.import_tasks: tasks/sync_files.yml
       tags:
