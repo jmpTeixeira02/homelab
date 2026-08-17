@@ -1,0 +1,15 @@
+ansible_host: 192.168.1.11
+user: core
+
+prowlarr:
+  providers:
+    - Nyaa.si
+    - LimeTorrents
+    - The Pirate Bay
+  apps:
+    - name: Lidarr
+      baseUrl: http://lidarr:8686
+      apiKey: "{{ LIDARR_API_KEY }}"
+    - name: Radarr
+      baseUrl: http://radarr:7878
+      apiKey: "{{ RADARR_API_KEY }}"

@@ -1,14 +1,14 @@
 setup:
-	cd infra && ansible-playbook setup.yml -K
+	cd ansible && ansible-playbook setup.yml -K
 
 setup-format-disk:
-	cd infra && ansible-playbook setup.yml -K --tags never
+	cd ansible && ansible-playbook setup.yml -K --tags never
 
 core-deploy-and-sync:
-	cd infra && ansible-playbook core.yml
+	cd ansible && ansible-playbook core.yml
 
 core-sync:
-	cd infra && ansible-playbook core.yml --tags sync
+	cd ansible && ansible-playbook core.yml --tags sync
 
 core-deploy:
-	cd infra && ansible-playbook core.yml --tags deploy
+	cd ansible && ansible-playbook core.yml --tags deploy

@@ -22,7 +22,7 @@ services:
     restart: always
     volumes:
       - ./data/lidarr:/config
-      # Optional: add media/storage mount if needed (e.g., /mnt/storage:/storage)
+      - /mnt/storage/music:/storage
     networks:
       - proxy
     environment:
