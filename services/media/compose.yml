@@ -2,7 +2,7 @@ services:
   prowlarr:
     image: linuxserver/prowlarr
     container_name: prowlarr
-    restart: always
+    restart: unless-stopped
     volumes:
       - ./data/prowlarr:/config
     networks:
@@ -19,7 +19,7 @@ services:
   lidarr:
     image: linuxserver/lidarr
     container_name: lidarr
-    restart: always
+    restart: unless-stopped
     volumes:
       - ./data/lidarr:/config
       - /mnt/storage/music:/storage
@@ -28,9 +28,30 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-    ports:
-      - 8686:8686
     labels:
       - traefik.enable=true
       - traefik.http.routers.lidarr.entryPoints=websecure
       - traefik.http.routers.lidarr.rule=Host(`lidarr.${DOMAIN}`)
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - WEBUI_PORT=8086
+      - TORRENTING_PORT=6881
+    volumes:
+      - ./data/:/config
+      - /mnt/storage/downloads:/downloads
+    ports:
+      - 6881:6881
+      - 6881:6881/udp
+    stop_grace_period: "10s"
+    restart: unless-stopped
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.qbittorrent.entryPoints=websecure
+      - traefik.http.routers.qbittorrent.rule=Host(`qbittorrent.${DOMAIN}`)
+      - traefik.http.services.qbittorrent.loadbalancer.server.port=8086
+    networks:
+      - proxy
